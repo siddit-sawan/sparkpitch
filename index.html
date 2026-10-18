@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)http://127.0.0.1:58395/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+<title>Sparkpitch — Neon Soccer Showdown</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===================== HOME ===================== -->
+  <section class="screen active" id="screen-home">
+    <div class="bg-orbs"><span></span><span></span><span></span></div>
+    <div class="home">
+      <header class="home-top">
+        <div class="brand">
+          <div class="brand-mark">⚽</div>
+          <div>
+            <h1>SPARK<span>PITCH</span></h1>
+            <p class="brand-sub">Neon soccer showdown</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <span class="double-badge" id="home-double" style="display:none">⚡ Double coins · <b id="home-double-count">0</b> matches</span>
+          <div class="chip" title="Your player name">🎽 <b id="home-player-label">P1</b></div>
+          <div class="chip coin-chip"><span class="coin-dot"></span><b id="home-coins">500</b><small>coins</small></div>
+        </div>
+      </header>
+
+      <div class="home-body">
+        <div class="hero-card panel">
+          <div class="hero-canvas-wrap"><canvas id="home-char-canvas" width="280" height="280"></canvas></div>
+          <div class="hero-meta">
+            <p class="eyebrow">Your striker</p>
+            <h2 id="home-char-name">Pip</h2>
+            <p class="muted" id="home-char-bio">A scrappy spark with a bottomless tank of energy. Always first to kick-off.</p>
+            <div class="hero-stats">
+              <span class="pill">Wins <b id="home-wins">0</b></span>
+              <span class="pill">Goals <b id="home-goals">0</b></span>
+              <span class="pill">Shards <b id="home-shards">0</b></span>
+            </div>
+            <p class="hint" id="home-player-line" style="margin-top:8px">Playing as P1 · signature: Spark Step. Change your name in Settings.</p>
+          </div>
+        </div>
+
+        <nav class="home-menu">
+          <button class="menu-btn primary" id="btn-play" style="--accent:#ffcf3f" type="button">
+            <span class="ico">▶</span>
+            <span><b>Play</b><small id="home-play-sub">Four modes, nine ways to play</small></span>
+          </button>
+          <button class="menu-btn" id="btn-tutorial" style="--accent:#7ad7ff" type="button">
+            <span class="ico">🎓</span>
+            <span><b>Learn to play</b><small>Coach Rex walks you through it</small></span>
+          </button>
+          <button class="menu-btn" id="btn-collection" style="--accent:#ff3d81" type="button">
+            <span class="ico">👥</span>
+            <span><b>Player Collection</b><small>Meet the Sparkpitch roster</small></span>
+          </button>
+          <button class="menu-btn" id="btn-abilities" style="--accent:#a06bff" type="button">
+            <span class="ico">✨</span>
+            <span><b>Special Abilities</b><small id="home-abil-count">0 / 43 unlocked</small></span>
+          </button>
+          <button class="menu-btn" id="btn-shop" style="--accent:#41a8ff" type="button">
+            <span class="ico">🎁</span>
+            <span><b>Pack Shop</b><small>Spend coins on ability packs</small></span>
+          </button>
+          <button class="menu-btn" id="btn-customize" style="--accent:#2ee6c5" type="button">
+            <span class="ico">🎨</span>
+            <span><b>Customize</b><small>Colors, hats, trails and glow</small></span>
+          </button>
+          <button class="menu-btn" id="btn-settings" style="--accent:#93a3cf" type="button">
+            <span class="ico">⚙</span>
+            <span><b>Settings</b><small>Controls, sound and saved data</small></span>
+          </button>
+          <section class="panel playtime-panel" id="playtime-panel" aria-label="Playtime rewards">
+            <div class="playtime-head">
+              <h3>⏱ Playtime</h3>
+              <span class="clock" id="playtime-clock">Cycle 1 · 0:00 played</span>
+            </div>
+            <div class="playtime-track"><div class="playtime-fill" id="playtime-fill" style="width:0%"></div></div>
+            <div class="playtime-marks" id="playtime-marks"><div class="pt-mile" title="1 minute of active play · 50 coins — 1:00 to go"><b>1m · 50</b><span>1:00 to go</span><button class="btn tiny ghost" disabled="">Locked</button></div><div class="pt-mile" title="5 minutes of active play · 150 coins — 5:00 to go"><b>5m · 150</b><span>5:00 to go</span><button class="btn tiny ghost" disabled="">Locked</button></div><div class="pt-mile" title="10 minutes of active play · 300 coins and 3 double-coin matches — 10:00 to go"><b>10m · 300 +2×</b><span>10:00 to go</span><button class="btn tiny ghost" disabled="">Locked</button></div></div>
+            <p class="pt-note" id="playtime-note">Next reward at 1 minute of active match play. Paused matches, menus and background tabs do not count.</p>
+          </section>
+        </nav>
+      </div>
+
+      <footer class="home-foot">
+        <span>Progress saves on this device</span>
+        <span>No accounts · No internet needed</span>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ===================== PLAY ===================== -->
+  <section class="screen" id="screen-play">
+    <div class="page">
+      <header class="page-top">
+        <button class="btn ghost" data-back="home" type="button">← Home</button>
+        <div class="page-title"><p class="eyebrow">Kick-off</p><h2>Choose your match</h2></div>
+        <div class="chip coin-chip"><span class="coin-dot"></span><b id="play-coins">500</b><small>coins</small></div>
+      </header>
+
+      <div class="play-grid">
+        <div class="panel">
+          <h3 class="panel-title">Game mode</h3>
+          <div class="mode-grid" id="mode-grid"></div>
+          <p class="hint" id="play-note"></p>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Match rules</h3>
+          <div class="field-row">
+            <label>Match length
+              <select id="opt-duration">
+                <option value="60">1 minute</option>
+                <option value="120" selected="">2 minutes</option>
+                <option value="180">3 minutes</option>
+                <option value="300">5 minutes</option>
+              </select>
+            </label>
+            <label>First to
+              <select id="opt-target">
+                <option value="0">No target (timer only)</option>
+                <option value="3">3 goals</option>
+                <option value="5" selected="">5 goals</option>
+                <option value="7">7 goals</option>
+              </select>
+            </label>
+            <label id="difficulty-field">AI difficulty
+              <select id="opt-difficulty">
+                <option value="beginner" selected="">Beginner (very easy) · ×1</option>
+                <option value="easy">Rookie · ×1.2</option>
+                <option value="normal">Pro · ×1.45</option>
+                <option value="hard">All-Star · ×1.75</option>
+                <option value="legend">Legend · ×2.1</option>
+              </select>
+            </label>
+            <label>First goal wins
+              <select id="opt-firstgoal">
+                <option value="0" selected="">Off — play the full match</option>
+                <option value="1">On — the next goal ends it</option>
+              </select>
+            </label>
+          </div>
+          <div class="payout-strip" id="payout-strip" aria-label="Coin payouts"></div>
+          <div id="play-loadouts"></div>
+          <button class="btn primary wide" id="btn-start-match" style="margin-top:16px" type="button">Start match ⚽</button>
+          <button class="btn ghost wide" id="btn-tutorial-play" style="margin-top:8px" type="button">🎓 Learn to play — guided tutorial</button>
+          <p class="hint">Press <b>Esc</b> during a match to pause. Equip two abilities here — each gets its own key during the match. Abilities are earned from packs, not handed out at the start.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COLLECTION ===================== -->
+  <section class="screen" id="screen-collection">
+    <div class="page">
+      <header class="page-top">
+        <button class="btn ghost" data-back="home" type="button">← Home</button>
+        <div class="page-title"><p class="eyebrow">Roster</p><h2>Player Collection</h2></div>
+        <div class="chip coin-chip"><span class="coin-dot"></span><b id="collection-coins">500</b><small>coins</small></div>
+      </header>
+      <div class="split">
+        <div class="panel">
+          <div class="preview-wrap"><canvas id="char-preview-canvas" width="320" height="320"></canvas></div>
+          <div class="preview-info">
+            <p class="eyebrow" id="char-rarity">Starter</p>
+            <h2 id="char-name">Pip</h2>
+            <p class="muted" id="char-bio"></p>
+            <div class="stat-row" id="char-tags"></div>
+            <div class="panel" id="char-sig" style="padding:12px 14px;margin:12px 0 2px;background:rgba(160,107,255,.09);border-color:rgba(160,107,255,.3)"></div>
+            <button class="btn primary wide" id="btn-char-action" type="button">Select</button>
+            <p class="hint">Every striker brings a signature ability on its own key, plus the two ability slots you equip from packs. Looks and signatures are balanced — no stat boosts.</p>
+          </div>
+        </div>
+        <div class="panel grow">
+          <h3 class="panel-title">All strikers</h3>
+          <div id="char-grid" class="card-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ABILITIES ===================== -->
+  <section class="screen" id="screen-abilities">
+    <div class="page">
+      <header class="page-top">
+        <button class="btn ghost" data-back="home" type="button">← Home</button>
+        <div class="page-title"><p class="eyebrow">Playbook</p><h2>Special Abilities</h2></div>
+        <div class="chip coin-chip"><span class="coin-dot"></span><b id="abil-coins">500</b><small>coins</small></div>
+      </header>
+
+      <div class="ab-toolbar">
+        <div class="player-tabs">
+          <button class="tab active" data-abil-player="0" type="button">Player 1</button>
+          <button class="tab" data-abil-player="1" type="button">Player 2</button>
+        </div>
+        <div id="abil-loadout" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        <div style="margin-left:auto" class="chip">🔹 <b id="abil-shards">0</b> shards</div>
+      </div>
+
+      <div class="panel">
+        <div class="ab-toolbar" style="margin-bottom:10px">
+          <span class="pill">Unlocked <b id="ability-count">2 / 30</b></span>
+          <span class="pill">Packs are the fastest way to collect</span>
+          <button class="btn ghost sm" id="btn-abil-shop" style="margin-left:auto" type="button">Open Pack Shop →</button>
+        </div>
+        <div id="ability-grid" class="card-grid"></div>
+        <div class="forge-box">
+          <div>
+            <b style="font-size:13.5px">Spark Forge</b>
+            <p class="muted">Trade duplicate shards for a random ability you do not own yet.</p>
+          </div>
+          <button class="btn gold sm" id="btn-forge" type="button">Forge · 150 shards</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SHOP ===================== -->
+  <section class="screen" id="screen-shop">
+    <div class="page">
+      <header class="page-top">
+        <button class="btn ghost" data-back="home" type="button">← Home</button>
+        <div class="page-title"><p class="eyebrow">Locker</p><h2>Pack Shop</h2></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="chip coin-chip"><span class="coin-dot"></span><b id="shop-coins">500</b><small>coins</small></div>
+          <div class="chip">🔹 <b id="shop-shards">0</b><small>shards</small></div>
+        </div>
+      </header>
+
+      <div class="shop-banner">
+        <div>
+          <div class="ad-provider" id="ad-provider">Rewarded ad · no provider on this build</div>
+          <h3>Watch Ad for a Reward</h3>
+          <p class="muted" id="ad-blurb">Complete an optional ad to earn coins, an ability, or a free pack. Never required to play.</p>
+        </div>
+        <div class="ad-row">
+          <button class="btn gold" id="btn-watch-ad" type="button">▶ Watch Ad for a Reward</button>
+          <span class="tag" id="ad-status">Dev build</span>
+        </div>
+      </div>
+
+      <div class="shop-grid" id="shop-packs"></div>
+      <p class="odds-note">
+        Packs contain random special abilities. Odds are listed per pack and no specific ability is guaranteed.
+        Duplicates are converted into coins plus Spark Shards, which feed the Spark Forge.
+        Prices and rewards are in-game only — there is nothing to buy with real money.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== CUSTOMIZE ===================== -->
+  <section class="screen" id="screen-customize">
+    <div class="page">
+      <header class="page-top">
+        <button class="btn ghost" data-back="home" type="button">← Home</button>
+        <div class="page-title"><p class="eyebrow">Locker room</p><h2>Customize</h2></div>
+        <div class="chip coin-chip"><span class="coin-dot"></span><b id="customize-coins">500</b><small>coins</small></div>
+      </header>
+
+      <div class="split">
+        <div class="panel">
+          <div class="preview-wrap"><canvas id="custom-canvas" width="320" height="320"></canvas></div>
+          <h3 id="custom-name" style="font-size:22px;font-weight:900">Pip</h3>
+          <p class="muted" id="custom-desc">Your current look.</p>
+          <div class="buy-bar" id="custom-buy-bar">
+            <button class="btn primary" id="btn-custom-buy" type="button">Equip</button>
+            <span class="price" id="custom-price" style="font-weight:800;color:var(--gold);font-size:13px"></span>
+          </div>
+          <p class="hint">All cosmetics are visual only — no stat boosts, ever.</p>
+        </div>
+
+        <div class="panel grow">
+          <div class="tab-row" id="custom-tabs">
+            <button class="tab active" data-custom-tab="hats" type="button">Hats</button>
+            <button class="tab" data-custom-tab="trails" type="button">Trails</button>
+            <button class="tab" data-custom-tab="glow" type="button">Glow</button>
+            <button class="tab" data-custom-tab="colors" type="button">Body color</button>
+            <button class="tab" data-custom-tab="ball" type="button">Ball color</button>
+          </div>
+          <div id="custom-grid"></div>
+          <p class="hint" id="custom-hint">Click an item to preview it, then equip or unlock it. Every color — body, hat and ball — is free.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SETTINGS ===================== -->
+  <section class="screen" id="screen-settings">
+    <div class="page">
+      <header class="page-top">
+        <button class="btn ghost" data-back="home" type="button">← Home</button>
+        <div class="page-title"><p class="eyebrow">Options</p><h2>Settings</h2></div>
+      </header>
+
+      <div class="settings-grid">
+        <div class="panel">
+          <h3 class="panel-title">Audio</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+            <button class="btn sm" id="settings-mute" type="button">🔊 Mute all audio</button>
+            <span class="pill">Synth SFX · music track</span>
+          </div>
+          <div class="slider-row">
+            <span class="name">Sound effects</span>
+            <input type="range" data-vol="sfx" min="0" max="100" step="1" value="80">
+            <span class="val" data-vol-val="sfx">80</span>
+          </div>
+          <div class="slider-row">
+            <span class="name">Crowd</span>
+            <input type="range" data-vol="crowd" min="0" max="100" step="1" value="50">
+            <span class="val" data-vol-val="crowd">50</span>
+          </div>
+          <div class="slider-row">
+            <span class="name">Goal cheer</span>
+            <input type="range" data-vol="cheer" min="0" max="100" step="1" value="60">
+            <span class="val" data-vol-val="cheer">60</span>
+          </div>
+          <div class="slider-row">
+            <span class="name">Music</span>
+            <input type="range" data-vol="music" min="0" max="100" step="1" value="28">
+            <span class="val" data-vol-val="music">28</span>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+            <button class="btn sm" id="btn-test-sound" type="button">Test sound</button>
+            <button class="btn sm" id="btn-test-cheer" type="button">Test crowd cheer</button>
+          </div>
+          <p class="hint">Every sound has its own bus, so lowering the crowd never touches kicks, goals or coins. There is no master fader — <b>Mute all audio</b> is the on/off switch. Music plays the <i>Match Day Adrenaline</i> track through the Music slider.</p>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Gameplay</h3>
+          <div class="set-row">
+            <span class="set-label">Aim assist<small>Gently bends shots that are already close to the goal (5–12°). Off = pure manual aiming.</small></span>
+            <button class="toggle" data-toggle="aimAssist" aria-pressed="true" aria-label="Toggle aim assist" type="button"></button>
+          </div>
+          <div class="set-row">
+            <span class="set-label">Shot indicator<small>Faint dashed guide showing where the ball will go.</small></span>
+            <button class="toggle" data-toggle="aimIndicator" aria-pressed="true" aria-label="Toggle shot indicator" type="button"></button>
+          </div>
+          <div class="set-row">
+            <span class="set-label">Screen shake<small>Small impact shake on goals and heavy hits.</small></span>
+            <button class="toggle" data-toggle="screenShake" aria-pressed="true" aria-label="Toggle screen shake" type="button"></button>
+          </div>
+          <div class="set-row">
+            <span class="set-label">Visual effects<small>Particles, trails and confetti. Turn off for a calmer pitch.</small></span>
+            <button class="toggle" data-toggle="visualFx" aria-pressed="true" aria-label="Toggle visual effects" type="button"></button>
+          </div>
+          <div class="set-row">
+            <span class="set-label">Sticky ball control<small>The ball sticks to whoever reaches it and follows your facing, so pressing kick always shoots. Hard shots still blast through and tackles still win the ball. Off = loose-ball physics.</small></span>
+            <button class="toggle" data-toggle="stickyBall" aria-pressed="true" aria-label="Toggle sticky ball control" type="button"></button>
+          </div>
+          <h3 class="panel-title" style="margin-top:18px">Player names</h3>
+          <div class="name-grid">
+            <label>Player 1<input type="text" id="name-p1" maxlength="16" autocomplete="off" spellcheck="false" placeholder="P1"></label>
+            <label>Player 2<input type="text" id="name-p2" maxlength="16" autocomplete="off" spellcheck="false" placeholder="P2"></label>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn sm primary" id="btn-save-names" type="button">Save names</button>
+            <button class="btn sm ghost" id="btn-cancel-names" type="button">Cancel</button>
+          </div>
+          <p class="name-note" id="name-note">Up to 16 characters. Names are plain text and show above your character and on the scoreboard.</p>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Controls</h3>
+          <div class="player-tabs">
+            <button class="tab active" data-bind-player="0" type="button">Player 1</button>
+            <button class="tab" data-bind-player="1" type="button">Player 2</button>
+          </div>
+          <table class="key-table" id="key-table"></table>
+          <p class="hint">Click a key to rebind, then press the new key. Movement keys can never share a key with kick or ability buttons.</p>
+          <div class="warn-box" id="bind-warning" style="display:none"></div>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Saved data</h3>
+          <p class="muted" style="font-size:12.5px">Coins, names, abilities, cosmetics, settings and playtime live in this browser's local storage. Clearing site data removes progress.</p>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+            <button class="btn sm" id="btn-export-save" type="button">Copy save code</button>
+            <button class="btn sm danger" id="btn-reset-save" type="button">Reset progress</button>
+          </div>
+          <div id="save-status" class="hint"></div>
+          <div class="warn-box" id="save-error" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MATCH ===================== -->
+  <section class="screen" id="screen-match">
+    <div class="match-shell">
+      <div class="match-top">
+        <button class="icon-btn" id="btn-pause" title="Pause" type="button">❚❚</button>
+        <div class="scoreboard">
+          <span class="team team-a"><i class="dot a"></i><b id="hud-name-a">You</b></span>
+          <span class="score" id="hud-score">0 <em>–</em> 0</span>
+          <span class="team team-b"><b id="hud-name-b">Rivals</b><i class="dot b"></i></span>
+        </div>
+        <div class="match-clock">
+          <span id="hud-timer">2:00</span>
+          <small id="hud-target">First to 5</small>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <canvas id="game-canvas"></canvas>
+        <div class="hud-top"><div class="mode-tag" id="hud-mode">1v1 vs AI</div></div>
+        <div class="hud-bottom">
+          <div class="ability-cluster" id="hud-p1"></div>
+          <div class="ability-cluster right" id="hud-p2"></div>
+        </div>
+        <div class="countdown" id="countdown"><span>3</span></div>
+        <div class="goal-banner" id="goal-banner"><b>GOAL!</b><span id="goal-sub">Sparkpitch</span></div>
+        <div class="match-msg" id="match-msg"></div>
+
+        <div class="overlay" id="pause-menu">
+          <div class="modal">
+            <div class="result-badge">Match paused</div>
+            <h2>Take a breather</h2>
+            <p class="sub" id="pause-score">0 – 0</p>
+            <div class="controls-mini" id="pause-controls"></div>
+            <div class="modal-actions">
+              <button class="btn primary" id="btn-pause-resume" type="button">Resume</button>
+              <button class="btn" id="btn-pause-restart" type="button">Restart</button>
+              <button class="btn ghost" id="btn-pause-quit" type="button">Quit to home</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="overlay" id="result">
+          <div class="modal">
+            <div class="result-badge" id="result-badge">Full time</div>
+            <h2 id="result-title">Victory!</h2>
+            <p class="sub" id="result-sub">You lit up the pitch.</p>
+            <div class="score" id="result-score">0 – 0</div>
+            <div class="reward-list" id="result-rewards"></div>
+            <div class="modal-actions">
+              <button class="btn primary" id="btn-rematch" type="button">Rematch</button>
+              <button class="btn gold" id="btn-result-ad" type="button">▶ Watch Ad · 2× coins</button>
+              <button class="btn ghost" id="btn-result-home" type="button">Home</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tutorial-bar" id="tutorial-bar" aria-live="polite">
+        <div class="tutorial-portrait"><canvas id="tutorial-portrait" width="128" height="128"></canvas></div>
+        <div class="tutorial-body">
+          <div class="tutorial-head"><b>Coach Rex</b><span id="tutorial-step">Step 1</span></div>
+          <p class="tutorial-text" id="tutorial-text"></p>
+          <div class="tutorial-foot">
+            <div class="tutorial-dots" id="tutorial-dots"></div>
+            <button class="btn ghost sm" id="btn-tutorial-skip" type="button">Skip step</button>
+            <button class="btn ghost sm" id="btn-tutorial-exit" type="button">Exit tutorial</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-legend" id="control-legend"></div>
+    </div>
+  </section>
+
+  <!-- ===================== PACK OPENING ===================== -->
+  <div class="overlay" id="pack-overlay">
+    <div class="modal wide">
+      <div class="result-badge" id="pack-badge">Pack opening</div>
+      <h2 id="pack-title">Rookie Pack</h2>
+      <p class="sub" id="pack-sub">Tap the pack to open it.</p>
+      <div class="pack-stage" id="pack-stage"></div>
+      <div class="modal-actions">
+        <button class="btn primary" id="btn-pack-collect" style="display:none" type="button">Collect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== AD / INFO MODAL ===================== -->
+  <div class="overlay" id="ad-modal">
+    <div class="modal ad-modal-body">
+      <div class="result-badge" id="ad-modal-badge">Rewarded ad</div>
+      <h2 id="ad-modal-title">Rewarded ads</h2>
+      <div id="ad-modal-body"></div>
+      <div class="modal-actions">
+        <button class="btn primary" id="btn-ad-close" type="button">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== CONFIRM MODAL ===================== -->
+  <div class="overlay" id="confirm-modal">
+    <div class="modal">
+      <div class="result-badge">Hold on</div>
+      <h2 id="confirm-title">Are you sure?</h2>
+      <p class="sub" id="confirm-body"></p>
+      <div class="modal-actions">
+        <button class="btn danger" id="btn-confirm-yes" type="button">Yes, do it</button>
+        <button class="btn ghost" id="btn-confirm-no" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+</div>
+
+<script src="js/game.js"></script>
+
+
+</body></html>
