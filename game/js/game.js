@@ -338,6 +338,7 @@ function loadSave() {
     return;
   }
   if (!raw) { freshSave = true; return; }
+  freshSave = false;
   try {
     const data = JSON.parse(raw);
     if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("Save data is not a valid object");
@@ -396,7 +397,7 @@ function loadSave() {
     if (!MODES.some(m => m.id === merged.lastMode)) merged.lastMode = "1v1ai";
     if (![60,120,180,300].includes(Number(merged.lastDuration))) merged.lastDuration = 120;
     if (![0,3,5,7].includes(Number(merged.lastTarget))) merged.lastTarget = 5;
-    SAVE = merged;
+    replaceSave(merged);
   } catch (err) {
     console.warn("Save load failed", err);
     saveBlocked = true;
@@ -408,17 +409,23 @@ function replaceSave(next) {
   for (const key of Object.keys(SAVE)) delete SAVE[key];
   Object.assign(SAVE, next);
 }
+let lastSavedJSON = "", lastSavedBody = "", onSaved = null;
 function persist() {
   if (saveBlocked) return;
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE));
+    SAVE.savedAt = Date.now();
+    lastSavedJSON = JSON.stringify(SAVE);
+    lastSavedBody = saveBody();
+    localStorage.setItem(SAVE_KEY, lastSavedJSON);
     storageOK = true;
     saveError = "";
   } catch (err) {
     storageOK = false;
     saveError = "Progress could not be saved — local storage is full or blocked. Your session continues, but it may not survive a refresh.";
     console.warn("Save failed", err);
+    return;
   }
+  if (onSaved) onSaved();
 }
 
 /* ==========================================================================
@@ -1518,6 +1525,53 @@ const CG = {
   }
 };
 CG.init();
+
+/* ==========================================================================
+   AUTOSAVE — localStorage is always the primary save, so guests keep their
+   progress. When the CrazyGames SDK is live, every save is mirrored to
+   SDK.data, which syncs to the player's account when they are logged in.
+   ========================================================================== */
+const CloudSave = {
+  ready: false,
+  data() { const sdk = CG.sdk(); return (this.ready && sdk && sdk.data) || null; },
+  push() {
+    const d = this.data();
+    if (!d || !lastSavedJSON) return;
+    try { d.setItem(SAVE_KEY, lastSavedJSON); } catch (e) {}
+  },
+  /* Adopts the account copy when it is newer than this device's copy. */
+  pull() {
+    const d = this.data();
+    if (!d) return;
+    let cloud = null;
+    try { cloud = JSON.parse(d.getItem(SAVE_KEY)); } catch (e) {}
+    const cloudAt = cloud && typeof cloud === "object" ? Number(cloud.savedAt) || 0 : 0;
+    if (cloudAt > (Number(SAVE.savedAt) || 0) && !saveBlocked && !(MATCH.active && !MATCH.over)) {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(cloud));
+        loadSave();
+        applySaveToSettings();
+        syncSetupFromSave();
+        showScreen("home", { force: true });
+        toast("Progress synced from your account.", "good");
+        return;
+      } catch (e) {}
+    }
+    if (SAVE.savedAt && cloudAt < SAVE.savedAt) this.push();
+  },
+  start() {
+    CG.init().then(ok => { if (!ok) return; this.ready = true; this.pull(); });
+  }
+};
+onSaved = () => CloudSave.push();
+/* Saves on a timer and whenever the page is hidden or closed, not just on actions. */
+function saveBody() { return JSON.stringify(SAVE, (k, v) => k === "savedAt" ? undefined : v); }
+function autosave() {
+  if (!saveBlocked && saveBody() !== lastSavedBody) persist();
+}
+setInterval(autosave, 10000);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") autosave(); });
+window.addEventListener("pagehide", autosave);
 
 function adCooldownRemaining() {
   return Math.max(0, AD_COOLDOWN_MS - (Date.now() - (SAVE.ad.lastAt || 0)));
@@ -5909,6 +5963,7 @@ function boot() {
     persist();
   }
   if (freshSave) persist();
+  CloudSave.start();
   syncSetupFromSave();
   wireUI();
   showScreen("home", { force: true });
