@@ -1381,9 +1381,12 @@ const Ads = {
     let detected = null;
     if (window.PokiSDK && typeof window.PokiSDK.rewardedBreak === "function") {
       detected = "Poki";
-    } else if (window.CrazyGames && window.CrazyGames.SDK && window.CrazyGames.SDK.ad &&
-               typeof window.CrazyGames.SDK.ad.requestAd === "function") {
-      detected = "CrazyGames";
+    } else {
+      // The CrazyGames SDK throws from its `ad` getter until init() has finished.
+      try {
+        const cg = window.CrazyGames && window.CrazyGames.SDK;
+        if (cg && cg.ad && typeof cg.ad.requestAd === "function") detected = "CrazyGames";
+      } catch (e) {}
     }
     if (detected !== this.provider) {
       this.provider = detected;
