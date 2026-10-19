@@ -1511,15 +1511,19 @@ const CG = {
       this.setAdMute(false);
       next();
     };
-    this.init().then(ok => {
-      if (!ok || !this.sdk().ad || typeof this.sdk().ad.requestAd !== "function") { done(); return; }
+    // An SDK that never finishes init() (wrong domain, blocked, offline) must not freeze the menu.
+    const ready = Promise.race([this.init(), new Promise(r => setTimeout(() => r(false), 3000))]);
+    ready.then(ok => {
+      // The SDK throws from its `ad` getter when ads are unavailable, so every access sits in the try.
       try {
-        this.sdk().ad.requestAd("midgame", {
+        const ad = ok && this.sdk().ad;
+        if (!ad || typeof ad.requestAd !== "function") { done(); return; }
+        ad.requestAd("midgame", {
           adStarted: () => this.setAdMute(true),
           adFinished: done,
           adError: done
         });
-      } catch (e) { done(); }
+      } catch (e) { done(); return; }
       setTimeout(done, 60000);
     });
   }
